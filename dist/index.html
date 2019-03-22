@@ -75,6 +75,15 @@
             font-size: 32px;
             text-transform: uppercase;
         }
+        
+        .class-info {
+            font-weight: 700;
+        }
+        @media(max-width: 600px) {
+            .class-info {
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
 
@@ -82,32 +91,40 @@
     <!-- <link rel="apple-touch-icon" href="https://www.global.com/awards/img/apple-icon-180x180.png"> -->
 
 <body>
-    <div class="wrap">
-        <h1>Swing Patrol Classes</h1>
+    <div id="classes-app">
 
-        <section id="classes-app" class="classes-container">
-            <div class="classes-column">
-                <div class="classes-day-wrap">
-                    <class-day :day="'Monday'" :classes="classes" :color="'#ffb400'"></class-day>
+        <div class="wrap">
+            <h1>Swing Patrol Classes</h1>
+
+            <section class="classes-container">
+                <div class="classes-column">
+                    <div class="classes-day-wrap">
+                        <class-day :day="'Monday'" :classes="classes" :color="'#ffb400'"></class-day>
+                    </div>
+                    <div class="classes-day-wrap">
+                        <class-day :day="'Tuesday'" :classes="classes" :color="'#01dfa8'"></class-day>
+                    </div>
                 </div>
-                <div class="classes-day-wrap">
-                    <class-day :day="'Tuesday'" :classes="classes" :color="'#01dfa8'"></class-day>
-                </div>
-            </div>
+                
+                
+                <div class="classes-column">
+                    <div class="classes-day-wrap">
+                        <class-day :day="'Wednesday'" :classes="classes" :color="'#ff0066'"></class-day>
+                    </div>
             
-            
-            <div class="classes-column">
-                <div class="classes-day-wrap">
-                    <class-day :day="'Wednesday'" :classes="classes" :color="'#ff0066'"></class-day>
+                    <div class="classes-day-wrap">
+                        <class-day :day="'Thursday'" :classes="classes" :color="'#b700f3'"></class-day>
+                        <class-day :day="'Sunday'" :classes="classes" :color="'#008af5'"></class-day>
+                    </div>
                 </div>
-        
-                <div class="classes-day-wrap">
-                    <class-day :day="'Thursday'" :classes="classes" :color="'#b700f3'"></class-day>
-                    <class-day :day="'Sunday'" :classes="classes" :color="'#008af5'"></class-day>
-                </div>
-            </div>
-            
-        </section>
+                
+            </section>
+        </div>
+
+        <div class="wrap">
+            <class-info class="class-info"></class-info>
+        </div>
+
     </div>
 
     <script>
@@ -121,26 +138,40 @@
                 <h2 :style="'color: ' + color">{{ day }}</h2>
                 <ul>
                     <li v-for="item in classesForDay">
-                        <a href="#" v-html="item.name"></a>
+                        <a href="#" @click.prevent="$root.$emit('select-class', item)" v-html="item.name"></a>
                     </li>
                 </ul>
             </div>`,
-
-        data() {
-            return {
-                
-            }
-        },
         computed: {
             classesForDay() {
                 return this.classes.filter(item => item.day === this.day);
             },
-        },
-        methods: {
+        }
+    });
 
+    Vue.component('class-info', {
+        template:
+            `<div>
+                <h3> {{ name }} </h3>
+                <div v-for="level in class_plan">
+                    <h4>{{ level.title }}</h4>
+                    <div v-for="plan_item in level.plan">
+                        {{ plan_item.date }} | {{ plan_item.content }}
+                    </div>
+                </div>
+            </div>`,
+        data() {
+            return {
+                name: '',
+                class_plan: []
+            }
         },
-        created() {
-            
+        mounted() {
+            this.$root.$on('select-class', data => {
+                console.log(data);
+                this.name = data.name;
+                this.class_plan = data.fields.class_plan;
+            });
         }
     });
 
