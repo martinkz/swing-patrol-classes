@@ -1,0 +1,169 @@
+<!doctype html>
+<html class="no-js" prefix="og: http://ogp.me/ns#" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="Swing Patrol Classes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <title>Swing Patrol Classes</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.9/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Open Sans Condensed', sans-serif;
+            font-size: 22px;
+        }
+        @media(max-width: 600px) {
+            body {
+                font-size: 20px;
+            }
+        }
+        .wrap {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin: 5px 0 12px;
+            text-align: center;
+            color: #8c857c;
+            font-size: 40px;
+        }
+
+        .classes-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .classes-column {
+            flex: 1 0 320px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+
+        .classes-day {
+            text-align: center;
+        }
+
+        .classes-day ul {
+            max-width: 170px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .classes-day li {
+            margin: 4px 0;
+            padding: 3px 8px;
+            background-color: #f7f7f7;
+        }
+
+        .classes-day a {
+            display: block;
+            font-weight: 700;
+            text-decoration: none;
+            color: #555;
+        }
+
+        .classes-day h2 {
+            margin: 10px 0;
+            font-size: 32px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+
+    <!-- <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"> -->
+    <!-- <link rel="apple-touch-icon" href="https://www.global.com/awards/img/apple-icon-180x180.png"> -->
+
+<body>
+    <div class="wrap">
+        <h1>Swing Patrol Classes</h1>
+
+        <section id="classes-app" class="classes-container">
+            <div class="classes-column">
+                <div class="classes-day-wrap">
+                    <class-day :day="'Monday'" :classes="classes" :color="'#ffb400'"></class-day>
+                </div>
+                <div class="classes-day-wrap">
+                    <class-day :day="'Tuesday'" :classes="classes" :color="'#01dfa8'"></class-day>
+                </div>
+            </div>
+            
+            
+            <div class="classes-column">
+                <div class="classes-day-wrap">
+                    <class-day :day="'Wednesday'" :classes="classes" :color="'#ff0066'"></class-day>
+                </div>
+        
+                <div class="classes-day-wrap">
+                    <class-day :day="'Thursday'" :classes="classes" :color="'#b700f3'"></class-day>
+                    <class-day :day="'Sunday'" :classes="classes" :color="'#008af5'"></class-day>
+                </div>
+            </div>
+            
+        </section>
+    </div>
+
+    <script>
+    
+    // Sort classes by name
+
+    Vue.component('class-day', {
+        props: ['day','classes', 'color'],
+        template:
+            `<div class="classes-day">
+                <h2 :style="'color: ' + color">{{ day }}</h2>
+                <ul>
+                    <li v-for="item in classesForDay">
+                        <a href="#" v-html="item.name"></a>
+                    </li>
+                </ul>
+            </div>`,
+
+        data() {
+            return {
+                
+            }
+        },
+        computed: {
+            classesForDay() {
+                return this.classes.filter(item => item.day === this.day);
+            },
+        },
+        methods: {
+
+        },
+        created() {
+            
+        }
+    });
+
+    let vueInstance = new Vue({
+        el: '#classes-app',
+        data() {
+            return {
+                classes: []
+            }
+        },
+        created() {
+            for(let i=1; i<=3; i++) {
+                axios.get('https://www.swingpatrol.co.uk/wp-json/classes/all?locations=london&order=date&page=' + i)
+                .then(function (response) {
+                    console.log(response.data.posts);
+                    vueInstance.classes.push(...response.data.posts);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+            }
+        },
+    });
+    </script>
+</body>
+</html>
