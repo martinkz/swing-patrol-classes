@@ -11,6 +11,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700" rel="stylesheet">
+
+    <link rel="dns-prefetch" href="https://www.swingpatrol.co.uk/">
+    
     <style>
         body {
             margin: 0;
@@ -23,14 +26,14 @@
             }
         }
         .wrap {
-            max-width: 800px;
+            max-width: 740px;
             margin: 0 auto;
         }
 
         h1 {
             margin: 5px 0 12px;
             text-align: center;
-            color: #8c857c;
+            color: #e0cfb9;
             font-size: 40px;
         }
 
@@ -78,6 +81,7 @@
         
         .class-info {
             font-weight: 700;
+            font-size: 20px;
         }
         @media(max-width: 600px) {
             .class-info {
@@ -129,7 +133,7 @@
 
     <script>
     
-    // Sort classes by name
+    // Add "all class plans" button
 
     Vue.component('class-day', {
         props: ['day','classes', 'color'],
@@ -152,25 +156,45 @@
     Vue.component('class-info', {
         template:
             `<div>
-                <h3> {{ name }} </h3>
-                <div v-for="level in class_plan">
-                    <h4>{{ level.title }}</h4>
-                    <div v-for="plan_item in level.plan">
-                        {{ plan_item.date }} | {{ plan_item.content }}
-                    </div>
+                <h3 v-html="name"></h3>
+
+                <h3>Date <span v-for="item in classPlans"> | {{ item.level }} </span></h3>
+
+                <div v-for="item in planDates">
+                    <span> {{ item }} </span> 
+                    <span v-for="planItem in classPlans">
+                        | {{ planItem.plan.find(entry => entry.date === item).content }}
+                    </span>
                 </div>
             </div>`,
         data() {
             return {
                 name: '',
-                class_plan: []
+                classPlans: [],
+                planDates: new Set()
             }
         },
         mounted() {
             this.$root.$on('select-class', data => {
-                console.log(data);
+                let plan = [];
+                this.planDates.clear();
+
+                if(data.fields.class_plan !== null) {
+                    Object.values(data.fields.class_plan).forEach(item => plan.push({
+                        'level': item.title, 
+                        'plan': Object.values(item.plan)
+                    }));
+                    plan.sort((a, b) =>  a.level > b.level ? 1 : -1);
+
+                    for(let level of plan) {
+                        Object.values(level.plan).forEach(item => this.planDates.add(item.date));
+                    }
+                }
+
+                this.classPlans = plan;
                 this.name = data.name;
-                this.class_plan = data.fields.class_plan;
+
+                console.log(this.planDates);
             });
         }
     });
@@ -188,6 +212,7 @@
                 .then(function (response) {
                     console.log(response.data.posts);
                     vueInstance.classes.push(...response.data.posts);
+                    vueInstance.classes.sort((a, b) =>  a.name > b.name ? 1 : -1);
                 })
                 .catch(function (error) {
                     console.log(error);
