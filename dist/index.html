@@ -103,7 +103,7 @@
         .cols-4 { grid-template-columns: repeat(4, auto); }
         .cols-5 { grid-template-columns: repeat(5, auto); }
 
-        .class-plan-grid div {
+        .class-plan-grid > * {
             padding: 5px 10px;
         }
 
@@ -177,33 +177,43 @@
 
     Vue.component('class-info', {
         template:
-            `<article>
+            `<article v-show="name !== undefined">
                 <h2 class="center" :style="'color: ' + color" v-html="name"></h2>
 
-                <div class="class-plan-grid" :class="'cols-' + (classPlans.length+1)">
-                    <div><h3>Date</h3></div> <div v-for="item in classPlans"><h3>{{ item.level }}</h3></div>
+                <div class="class-plan-grid" :class="'cols-' + (classPlans.length+1)" v-show="planDates.size !== 0">
+                    <h3>Date</h3>
+                    <h3 v-for="item in classPlans">{{ item.level }}</h3>
+
                     <template v-for="(item, idx) in planDates">
-                        <div :class="(idx+1) % 2 ? 'cell-is-odd' : ''"> {{ item }} </div> 
+                        <div :class="(idx+1) % 2 ? 'cell-is-odd' : ''"> {{ formatDate(item) }} </div> 
                         <div :class="(idx+1) % 2 ? 'cell-is-odd' : ''" v-for="planItem in classPlans">
                             {{ planItem.plan.find(entry => entry.date === item).content }}
                         </div>
                     </template>
                 </div>
+
+                <p v-show="planDates.size === 0" class="center">Class plan empty</p>
             </article>`,
         data() {
             return {
-                name: '',
-                day: '',
-                address: '',
-                google_maps_url: '',
-                color: '',
+                name: undefined,
+                day: undefined,
+                address: undefined,
+                google_maps_url: undefined,
+                color: undefined,
                 classTimes: [],
                 classPlans: [],
                 planDates: new Set()
             }
         },
+        methods: {
+            formatDate(date) {
+                let months = {'01':'Jan', '02':'Feb', '03':'Mar', '04':'Apr', '05':'May', '06':'Jun', '07':'Jul', '08':'Aug', '09':'Sep', '10':'Oct', '11':'Nov', '12':'Dec'};
+                return date.substring(6) + ' ' + months[date.substring(4,6)];
+            }
+        },
         mounted() {
-            this.$root.$on('select-class', data => { console.log(data);
+            this.$root.$on('select-class', data => {
                 let classData = data.item;
                 let plan = [];
                 this.planDates.clear();
@@ -223,8 +233,6 @@
                 this.classPlans = plan;
                 this.name = classData.name;
                 this.color = data.color;
-
-                //setTimeout(function() { document.getElementById("class-info").scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"}); }, 200);
             });
         },
         updated: function () {
