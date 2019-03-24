@@ -80,9 +80,15 @@
             font-size: 32px;
             text-transform: uppercase;
         }
+
+        .class-info header h2 {
+            margin-bottom: 0;
+        }
         
-        .class-info {
-            
+        .class-info .class-more-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         
         .class-plan-grid {
@@ -178,7 +184,12 @@
     Vue.component('class-info', {
         template:
             `<article v-show="name !== undefined">
-                <h2 class="center" :style="'color: ' + color" v-html="name"></h2>
+                <header>
+                    <h2 class="center" :style="'color: ' + color" v-html="name"></h2>
+                    <div class="class-more-info">
+                        {{ day }} • {{ address }}
+                    </div>
+                </header>
 
                 <div class="class-plan-grid" :class="'cols-' + (classPlans.length+1)" v-show="planDates.size !== 0">
                     <h3>Date</h3>
@@ -200,6 +211,10 @@
                 day: undefined,
                 address: undefined,
                 google_maps_url: undefined,
+                citymapper_url: undefined,
+                teachers: undefined,
+                class_times: undefined,
+                swingpatrol_url: undefined,
                 color: undefined,
                 classTimes: [],
                 classPlans: [],
@@ -233,6 +248,9 @@
                 this.classPlans = plan;
                 this.name = classData.name;
                 this.color = data.color;
+                this.day = classData.day;
+                this.address = classData.fields.location.address;
+                this.google_maps_url = classData.fields.google_maps_url;
             });
         },
         updated: function () {
