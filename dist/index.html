@@ -37,6 +37,8 @@
             font-size: 40px;
         }
 
+        .center { text-align: center }
+
         .classes-container {
             display: flex;
             flex-wrap: wrap;
@@ -80,13 +82,33 @@
         }
         
         .class-info {
+            
+        }
+        
+        .class-plan-grid {
+            display: grid;
             font-weight: 700;
             font-size: 20px;
         }
+
         @media(max-width: 600px) {
-            .class-info {
-                font-size: 16px;
+            .class-plan-grid {
+                font-size: 14px;
             }
+        }
+
+
+        .cols-2 { grid-template-columns: repeat(2, auto); }
+        .cols-3 { grid-template-columns: repeat(3, auto); }
+        .cols-4 { grid-template-columns: repeat(4, auto); }
+        .cols-5 { grid-template-columns: repeat(5, auto); }
+
+        .class-plan-grid div {
+            padding: 5px 10px;
+        }
+
+        .class-plan-grid .cell-is-odd {
+            background-color: #f3f3f3;
         }
     </style>
 </head>
@@ -97,7 +119,7 @@
 <body>
     <div id="classes-app">
 
-        <div class="wrap">
+        <main class="wrap">
             <h1>Swing Patrol Classes</h1>
 
             <section class="classes-container">
@@ -123,11 +145,11 @@
                 </div>
                 
             </section>
-        </div>
+        </main>
 
-        <div class="wrap">
-            <class-info class="class-info"></class-info>
-        </div>
+        <aside class="wrap">
+            <class-info id="class-info" class="class-info"></class-info>
+        </aside>
 
     </div>
 
@@ -142,7 +164,7 @@
                 <h2 :style="'color: ' + color">{{ day }}</h2>
                 <ul>
                     <li v-for="item in classesForDay">
-                        <a href="#" @click.prevent="$root.$emit('select-class', item)" v-html="item.name"></a>
+                        <a href="#" @click.prevent="$root.$emit('select-class', {'item':item, 'color':color})" v-html="item.name"></a>
                     </li>
                 </ul>
             </div>`,
@@ -155,32 +177,39 @@
 
     Vue.component('class-info', {
         template:
-            `<div>
-                <h3 v-html="name"></h3>
+            `<article>
+                <h2 class="center" :style="'color: ' + color" v-html="name"></h2>
 
-                <h3>Date <span v-for="item in classPlans"> | {{ item.level }} </span></h3>
-
-                <div v-for="item in planDates">
-                    <span> {{ item }} </span> 
-                    <span v-for="planItem in classPlans">
-                        | {{ planItem.plan.find(entry => entry.date === item).content }}
-                    </span>
+                <div class="class-plan-grid" :class="'cols-' + (classPlans.length+1)">
+                    <div><h3>Date</h3></div> <div v-for="item in classPlans"><h3>{{ item.level }}</h3></div>
+                    <template v-for="(item, idx) in planDates">
+                        <div :class="(idx+1) % 2 ? 'cell-is-odd' : ''"> {{ item }} </div> 
+                        <div :class="(idx+1) % 2 ? 'cell-is-odd' : ''" v-for="planItem in classPlans">
+                            {{ planItem.plan.find(entry => entry.date === item).content }}
+                        </div>
+                    </template>
                 </div>
-            </div>`,
+            </article>`,
         data() {
             return {
                 name: '',
+                day: '',
+                address: '',
+                google_maps_url: '',
+                color: '',
+                classTimes: [],
                 classPlans: [],
                 planDates: new Set()
             }
         },
         mounted() {
-            this.$root.$on('select-class', data => {
+            this.$root.$on('select-class', data => { console.log(data);
+                let classData = data.item;
                 let plan = [];
                 this.planDates.clear();
 
-                if(data.fields.class_plan !== null) {
-                    Object.values(data.fields.class_plan).forEach(item => plan.push({
+                if(classData.fields.class_plan !== null) {
+                    Object.values(classData.fields.class_plan).forEach(item => plan.push({
                         'level': item.title, 
                         'plan': Object.values(item.plan)
                     }));
@@ -192,10 +221,14 @@
                 }
 
                 this.classPlans = plan;
-                this.name = data.name;
+                this.name = classData.name;
+                this.color = data.color;
 
-                console.log(this.planDates);
+                //setTimeout(function() { document.getElementById("class-info").scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"}); }, 200);
             });
+        },
+        updated: function () {
+            document.getElementById("class-info").scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"});
         }
     });
 
