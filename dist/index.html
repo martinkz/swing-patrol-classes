@@ -86,9 +86,19 @@
         }
         
         .class-info .class-more-info {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            margin-top: 10px;
+            padding: 5px 1em;
+            text-align: center;
+            color: #6d6d6d;
+            background-color: #f1efeb;
+        }
+
+        .class-info .class-more-info div {
+            padding: 1px 0;
+        }
+
+        .class-info .class-more-info div:not(:last-child) {
+            border-bottom: 1px solid #dcd9d3;
         }
         
         .class-plan-grid {
@@ -103,6 +113,9 @@
             }
         }
 
+        .class-plan-grid h3 span {
+            color: #bbb3a4;
+        }
 
         .cols-2 { grid-template-columns: repeat(2, auto); }
         .cols-3 { grid-template-columns: repeat(3, auto); }
@@ -114,7 +127,7 @@
         }
 
         .class-plan-grid .cell-is-odd {
-            background-color: #f3f3f3;
+            background-color: #f1f1f1;
         }
     </style>
 </head>
@@ -126,7 +139,7 @@
     <div id="classes-app">
 
         <main class="wrap">
-            <h1>Swing Patrol Classes</h1>
+            <!--<h1>Swing Patrol Classes</h1>-->
 
             <section class="classes-container">
                 <div class="classes-column">
@@ -180,20 +193,20 @@
             },
         }
     });
-
+// •
     Vue.component('class-info', {
         template:
             `<article v-show="name !== undefined">
                 <header>
                     <h2 class="center" :style="'color: ' + color" v-html="name"></h2>
                     <div class="class-more-info">
-                        {{ day }} • {{ address }}
+                        <div><strong>{{ day }}</strong></div><div>{{ address }}</div><div>{{ teachers }}</div></template>
                     </div>
                 </header>
 
                 <div class="class-plan-grid" :class="'cols-' + (classPlans.length+1)" v-show="planDates.size !== 0">
                     <h3>Date</h3>
-                    <h3 v-for="item in classPlans">{{ item.level }}</h3>
+                    <h3 v-for="(item, idx) in classPlans">{{ item.level }} <span>({{ classTimes[idx].time }})</span></h3>
 
                     <template v-for="(item, idx) in planDates">
                         <div :class="(idx+1) % 2 ? 'cell-is-odd' : ''"> {{ formatDate(item) }} </div> 
@@ -208,13 +221,13 @@
         data() {
             return {
                 name: undefined,
-                day: undefined,
-                address: undefined,
-                google_maps_url: undefined,
-                citymapper_url: undefined,
-                teachers: undefined,
-                class_times: undefined,
-                swingpatrol_url: undefined,
+                day: '',
+                address: '',
+                google_maps_url: '',
+                citymapper_url: '',
+                teachers: '',
+                class_times: [],
+                swingpatrol_url: '',
                 color: undefined,
                 classTimes: [],
                 classPlans: [],
@@ -250,6 +263,8 @@
                 this.color = data.color;
                 this.day = classData.day;
                 this.address = classData.fields.location.address;
+                this.classTimes = classData.fields.class_times;
+                this.teachers = classData.fields.teachers.map(el => el.name).join(' & ');
                 this.google_maps_url = classData.fields.google_maps_url;
             });
         },
