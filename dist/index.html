@@ -86,36 +86,27 @@
         }
 
         .class-info header h2 {
-            margin: 0;
+            margin-bottom: 0;
             text-transform: uppercase;
         }
 
         .title-icons {
-            margin-top: 2em;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            margin-top: 10px;
         }
 
         .title-icons img {
-            margin-left: 10px;
             width: 36px;
             height: 36px;
+        }
+
+        .title-icons a + a {
+            margin-left: 12px;
         }
         
         .class-info .class-more-info {
             margin-top: 10px;
             padding: 5px 1em;
-            color: #6d6d6d;
-            background-color: #f5f3ee;
-        }
-
-        .class-info .class-more-info div {
-            padding: 1px 0;
-        }
-
-        .class-info .class-more-info div:not(:last-child) {
-            border-bottom: 1px solid #dcd9d3;
+            color: #333333;
         }
         
         .class-plan-grid {
@@ -215,13 +206,16 @@
         template:
             `<article v-show="name !== undefined">
                 <header>
-                    <div class="title-icons">
+                    <div>
                         <h2 class="center" :style="'color: ' + color" v-html="name"></h2>
-                        <a :href="citymapper_url" target="_blank" title="Citymapper"><img src="img/icon-citymapper.png" alt="Citymapper"></a>
-                        <a :href="google_maps_url" target="_blank" title="Google Maps"><img src="img/icon-gmaps.png" alt="Google Maps"></a>
                     </div>
                     <div class="class-more-info">
-                        <div><strong>{{ day }}</strong></div><div>{{ address }}</div><div>{{ teachers }}</div></template>
+                        <div><strong>{{ day }}</strong></div>
+                        <div>{{ teachers }}</div>
+                        <div class="title-icons">
+                            <a :href="citymapper_url" target="_blank" title="Citymapper"><img src="img/icon-citymapper.png" alt="Citymapper"></a>
+                            <a :href="google_maps_url" target="_blank" title="Google Maps"><img src="img/icon-gmaps.png" alt="Google Maps"></a>
+                        </div>
                     </div>
                 </header>
 
