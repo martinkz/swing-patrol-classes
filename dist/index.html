@@ -65,7 +65,7 @@
         .classes-day li {
             margin: 4px 0;
             padding: 3px 8px;
-            background-color: #f7f7f7;
+            background-color: #f7f6f4;
         }
 
         .classes-day a {
@@ -81,16 +81,33 @@
             text-transform: uppercase;
         }
 
+        .class-info header {
+            text-align: center;
+        }
+
         .class-info header h2 {
-            margin-bottom: 0;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .title-icons {
+            margin-top: 2em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .title-icons img {
+            margin-left: 10px;
+            width: 36px;
+            height: 36px;
         }
         
         .class-info .class-more-info {
             margin-top: 10px;
             padding: 5px 1em;
-            text-align: center;
             color: #6d6d6d;
-            background-color: #f1efeb;
+            background-color: #f5f3ee;
         }
 
         .class-info .class-more-info div {
@@ -193,12 +210,16 @@
             },
         }
     });
-// •
+    
     Vue.component('class-info', {
         template:
             `<article v-show="name !== undefined">
                 <header>
-                    <h2 class="center" :style="'color: ' + color" v-html="name"></h2>
+                    <div class="title-icons">
+                        <h2 class="center" :style="'color: ' + color" v-html="name"></h2>
+                        <a :href="citymapper_url" target="_blank" title="Citymapper"><img src="img/icon-citymapper.png" alt="Citymapper"></a>
+                        <a :href="google_maps_url" target="_blank" title="Google Maps"><img src="img/icon-gmaps.png" alt="Google Maps"></a>
+                    </div>
                     <div class="class-more-info">
                         <div><strong>{{ day }}</strong></div><div>{{ address }}</div><div>{{ teachers }}</div></template>
                     </div>
@@ -264,6 +285,8 @@
                 this.day = classData.day;
                 this.address = classData.fields.location.address;
                 this.classTimes = classData.fields.class_times;
+                this.citymapper_url = classData.fields.citymapper_url;
+                this.google_maps_url = classData.fields.google_maps_url;
                 this.teachers = classData.fields.teachers.map(el => el.name).join(' & ');
                 this.google_maps_url = classData.fields.google_maps_url;
             });
