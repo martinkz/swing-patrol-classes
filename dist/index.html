@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
     <title>Swing Patrol Classes</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.9/vue.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+    <script src="scripts/vue.min.js"></script>
+    <script src="scripts/axios.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700" rel="stylesheet">
 
@@ -16,7 +16,7 @@
     
     <style>
         body {
-            margin: 0;
+            margin: 0 0 30px 0;
             font-family: 'Open Sans Condensed', sans-serif;
             font-size: 22px;
         }
@@ -147,7 +147,7 @@
     <div id="classes-app">
 
         <main class="wrap">
-            <!--<h1>Swing Patrol Classes</h1>-->
+            <!-- <h1>Swing Patrol</h1> -->
 
             <section class="classes-container">
                 <div class="classes-column">
@@ -181,8 +181,6 @@
     </div>
 
     <script>
-    
-    // Add "all class plans" button
 
     Vue.component('class-day', {
         props: ['day','classes', 'color'],
@@ -206,9 +204,8 @@
         template:
             `<article v-show="name !== undefined">
                 <header>
-                    <div>
-                        <h2 class="center" :style="'color: ' + color" v-html="name"></h2>
-                    </div>
+                    <h2 class="center" :style="'color: ' + color" v-html="name"></h2>
+
                     <div class="class-more-info">
                         <div><strong>{{ day }}</strong></div>
                         <div>{{ teachers }}</div>
@@ -282,7 +279,6 @@
                 this.citymapper_url = classData.fields.citymapper_url;
                 this.google_maps_url = classData.fields.google_maps_url;
                 this.teachers = classData.fields.teachers.map(el => el.name).join(' & ');
-                this.google_maps_url = classData.fields.google_maps_url;
             });
         },
         updated: function () {
@@ -301,7 +297,6 @@
             for(let i=1; i<=3; i++) {
                 axios.get('https://www.swingpatrol.co.uk/wp-json/classes/all?locations=london&order=date&page=' + i)
                 .then(function (response) {
-                    console.log(response.data.posts);
                     vueInstance.classes.push(...response.data.posts);
                     vueInstance.classes.sort((a, b) =>  a.name > b.name ? 1 : -1);
                 })
@@ -312,5 +307,6 @@
         },
     });
     </script>
+    
 </body>
 </html>
