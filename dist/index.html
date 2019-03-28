@@ -228,7 +228,7 @@
 
                 <div class="class-plan-grid" :class="'cols-' + (classPlans.length+1)" v-show="planDates.size !== 0">
                     <h3>Date</h3>
-                    <h3 v-for="(item, idx) in classPlans">{{ item.level }} <span>({{ classTimes[idx].time }})</span></h3>
+                    <h3 v-for="(item, idx) in classPlans">{{ item.level }} <span>({{ classTimes.find(el => el.level == item.level.replace('Level ', '')).time }})</span></h3>
 
                     <template v-for="(item, idx) in planDates">
                         <div :class="(idx+1) % 2 ? 'cell-is-odd' : ''"> {{ formatDate(item) }} </div> 
