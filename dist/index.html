@@ -7,13 +7,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
     <title>Swing Patrol Classes</title>
-    <script src="scripts/vue.js"></script>
+    <script src="scripts/vue.min.js"></script>
     <script src="scripts/axios.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700" rel="stylesheet">
 
     <link rel="dns-prefetch" href="https://www.swingpatrol.co.uk/">
-    
+
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+
+    <meta property="og:title" content="Swing Patrol Class Info">
+    <meta property="og:description" content="Quick and easy way to access the Swing Patrol class plans">
+    <meta property="og:image" content="img/social.png">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://swing.me.uk">
+    <meta name="twitter:card" content="summary_large_image">
+
     <style>
         body {
             margin: 0 0 30px 0;
@@ -31,10 +41,10 @@
         }
 
         h1 {
-            margin: 5px 0 12px;
+            margin: 6px 0;
             text-align: center;
-            color: #e0cfb9;
-            font-size: 40px;
+            color: #333;
+            font-size: 24px;
         }
 
         .center { text-align: center }
@@ -102,13 +112,13 @@
         .title-icons a + a {
             margin-left: 12px;
         }
-        
+
         .class-info .class-more-info {
             margin-top: 10px;
             padding: 5px 1em;
             color: #333333;
         }
-        
+
         .class-plan-grid {
             display: grid;
             font-weight: 700;
@@ -141,42 +151,43 @@
 </head>
 
 <body>
-    <div id="classes-app">
+<div id="classes-app">
 
-        <main class="wrap">
-            <!-- <h1>Swing Patrol</h1> -->
+    <main class="wrap">
+        <h1>Swing Patrol Classes</h1>
 
-            <section class="classes-container">
-                <div class="classes-column">
-                    <div class="classes-day-wrap">
-                        <class-day :day="'Monday'" :classes="classes" :color="'#ffb400'"></class-day>
-                    </div>
-                    <div class="classes-day-wrap">
-                        <class-day :day="'Tuesday'" :classes="classes" :color="'#01dfa8'"></class-day>
-                    </div>
+        <section class="classes-container">
+            <div class="classes-column">
+                <div class="classes-day-wrap">
+                    <class-day :day="'Monday'" :classes="classes" :color="'#ffb400'"></class-day>
                 </div>
-                
-                
-                <div class="classes-column">
-                    <div class="classes-day-wrap">
-                        <class-day :day="'Wednesday'" :classes="classes" :color="'#ff0066'"></class-day>
-                    </div>
-            
-                    <div class="classes-day-wrap">
-                        <class-day :day="'Thursday'" :classes="classes" :color="'#b700f3'"></class-day>
-                        <class-day :day="'Sunday'" :classes="classes" :color="'#008af5'"></class-day>
-                    </div>
+                <div class="classes-day-wrap">
+                    <class-day :day="'Tuesday'" :classes="classes" :color="'#01dfa8'"></class-day>
                 </div>
-            </section>
-        </main>
+            </div>
 
-        <aside class="wrap">
-            <class-info id="class-info" class="class-info"></class-info>
-        </aside>
 
-    </div>
+            <div class="classes-column">
+                <div class="classes-day-wrap">
+                    <class-day :day="'Wednesday'" :classes="classes" :color="'#ff0066'"></class-day>
+                </div>
 
-    <script>
+                <div class="classes-day-wrap">
+                    <class-day :day="'Thursday'" :classes="classes" :color="'#b700f3'"></class-day>
+                    <class-day :day="'Sunday'" :classes="classes" :color="'#008af5'"></class-day>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <aside class="wrap">
+        <class-info id="class-info" class="class-info"></class-info>
+    </aside>
+
+</div>
+
+<script>
 
     Vue.component('class-day', {
         props: ['day','classes', 'color'],
@@ -195,7 +206,7 @@
             },
         }
     });
-    
+
     Vue.component('class-info', {
         template:
             `<article v-show="name !== undefined">
@@ -214,10 +225,10 @@
 
                 <div class="class-plan-grid" :class="'cols-' + (classPlans.length+1)" v-show="planDates.size !== 0">
                     <h3>Date</h3>
-                    <h3 v-for="(item, idx) in classPlans">{{ item.level }} <span>({{ findLevel(item) }})</span></h3>
+                    <h3 v-for="(item, idx) in classPlans">{{ item.level }} <span>({{ findLevel(item, idx) }})</span></h3>
 
                     <template v-for="(item, idx) in planDates">
-                        <div :class="(idx+1) % 2 ? 'cell-is-odd' : ''"> {{ formatDate(item) }} </div> 
+                        <div :class="(idx+1) % 2 ? 'cell-is-odd' : ''"> {{ formatDate(item) }} </div>
                         <div :class="(idx+1) % 2 ? 'cell-is-odd' : ''" v-for="planItem in classPlans">
                             {{ planItem.plan.find(entry => entry.date === item).content }}
                         </div>
@@ -247,8 +258,11 @@
                 let months = {'01':'Jan', '02':'Feb', '03':'Mar', '04':'Apr', '05':'May', '06':'Jun', '07':'Jul', '08':'Aug', '09':'Sep', '10':'Oct', '11':'Nov', '12':'Dec'};
                 return date.substring(6) + ' ' + months[date.substring(4,6)];
             },
-            findLevel(classItem) {
-                return this.classTimes.find(el => el.level == classItem.level.replace('Level ', '')).time;
+            findLevel(classItem, idx) {
+                let classTime = this.classTimes.find(el => el.level == classItem.level.replace('Level ', ''));
+                // Sometimes levels in classPlans don't match the levels in ClassTimes! (e.g. Clapham Junction has levels 1 & 2 in plan but 1 & 1.5 in class times)
+                // In this case we use the index and hope they come in the same order (always the case except for Waterloo)
+                return classTime ? classTime.time : this.classTimes[idx].time;
             }
         },
         mounted() {
@@ -259,7 +273,7 @@
 
                 if(classData.fields.class_plan !== null) {
                     Object.values(classData.fields.class_plan).forEach(item => plan.push({
-                        'level': item.title, 
+                        'level': item.title,
                         'plan': Object.values(item.plan)
                     }));
                     plan.sort((a, b) =>  a.level > b.level ? 1 : -1);
@@ -270,8 +284,8 @@
                 }
 
                 this.classPlans = plan;
-                this.color = data.color;
                 this.name = classData.name;
+                this.color = data.color;
                 this.day = classData.day;
                 this.address = classData.fields.location.address;
                 this.classTimes = classData.fields.class_times;
@@ -295,17 +309,17 @@
         created() {
             for(let i=1; i<=3; i++) {
                 axios.get('https://www.swingpatrol.co.uk/wp-json/classes/all?locations=london&order=date&page=' + i)
-                .then(function (response) {
-                    vueInstance.classes.push(...response.data.posts);
-                    vueInstance.classes.sort((a, b) =>  a.name > b.name ? 1 : -1);
-                })
-                .catch(function (error) {
-                    console.log(error);
-                });
+                    .then(function (response) {
+                        vueInstance.classes.push(...response.data.posts);
+                        vueInstance.classes.sort((a, b) =>  a.name > b.name ? 1 : -1);
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
             }
         },
     });
-    </script>
-    
+</script>
+
 </body>
 </html>
