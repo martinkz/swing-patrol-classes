@@ -299,23 +299,21 @@
         }
     });
 
-    let vueInstance = new Vue({
+    new Vue({
         el: '#classes-app',
         data() {
             return {
                 classes: []
             }
         },
-        created() {
+        mounted() {
             for(let i=1; i<=3; i++) {
                 axios.get('https://www.swingpatrol.co.uk/wp-json/classes/all?locations=london&order=date&page=' + i)
-                    .then(function (response) {
-                        vueInstance.classes.push(...response.data.posts);
-                        vueInstance.classes.sort((a, b) =>  a.name > b.name ? 1 : -1);
+                    .then(response => {
+                        this.classes.push(...response.data.posts);
+                        this.classes.sort((a, b) =>  a.name > b.name ? 1 : -1);
                     })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
+                    .catch(error => console.log(error));
             }
         },
     });
