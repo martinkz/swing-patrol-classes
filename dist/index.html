@@ -7,22 +7,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
     <title>Swing Patrol Classes</title>
-    <script src="scripts/vue.min.js"></script>
+    <script src="scripts/vue.js"></script>
     <script src="scripts/axios.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700" rel="stylesheet">
 
     <link rel="dns-prefetch" href="https://www.swingpatrol.co.uk/">
-
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
-
-    <meta property="og:title" content="Swing Patrol Class Info">
-    <meta property="og:description" content="Quick and easy way to access the Swing Patrol class plans">
-    <meta property="og:image" content="img/social.png">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://swing.me.uk">
-    <meta name="twitter:card" content="summary_large_image">
     
     <style>
         body {
@@ -41,10 +31,10 @@
         }
 
         h1 {
-            margin: 6px 0;
+            margin: 5px 0 12px;
             text-align: center;
-            color: #333;
-            font-size: 24px;
+            color: #e0cfb9;
+            font-size: 40px;
         }
 
         .center { text-align: center }
@@ -150,14 +140,11 @@
     </style>
 </head>
 
-    <!-- <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"> -->
-    <!-- <link rel="apple-touch-icon" href="https://www.global.com/awards/img/apple-icon-180x180.png"> -->
-
 <body>
     <div id="classes-app">
 
         <main class="wrap">
-            <h1>Swing Patrol Classes</h1>
+            <!-- <h1>Swing Patrol</h1> -->
 
             <section class="classes-container">
                 <div class="classes-column">
@@ -180,7 +167,6 @@
                         <class-day :day="'Sunday'" :classes="classes" :color="'#008af5'"></class-day>
                     </div>
                 </div>
-                
             </section>
         </main>
 
@@ -228,7 +214,7 @@
 
                 <div class="class-plan-grid" :class="'cols-' + (classPlans.length+1)" v-show="planDates.size !== 0">
                     <h3>Date</h3>
-                    <h3 v-for="(item, idx) in classPlans">{{ item.level }} <span>({{ classTimes.find(el => el.level == item.level.replace('Level ', '')).time }})</span></h3>
+                    <h3 v-for="(item, idx) in classPlans">{{ item.level }} <span>({{ findLevel(item) }})</span></h3>
 
                     <template v-for="(item, idx) in planDates">
                         <div :class="(idx+1) % 2 ? 'cell-is-odd' : ''"> {{ formatDate(item) }} </div> 
@@ -260,6 +246,9 @@
             formatDate(date) {
                 let months = {'01':'Jan', '02':'Feb', '03':'Mar', '04':'Apr', '05':'May', '06':'Jun', '07':'Jul', '08':'Aug', '09':'Sep', '10':'Oct', '11':'Nov', '12':'Dec'};
                 return date.substring(6) + ' ' + months[date.substring(4,6)];
+            },
+            findLevel(classItem) {
+                return this.classTimes.find(el => el.level == classItem.level.replace('Level ', '')).time;
             }
         },
         mounted() {
@@ -281,8 +270,8 @@
                 }
 
                 this.classPlans = plan;
-                this.name = classData.name;
                 this.color = data.color;
+                this.name = classData.name;
                 this.day = classData.day;
                 this.address = classData.fields.location.address;
                 this.classTimes = classData.fields.class_times;
