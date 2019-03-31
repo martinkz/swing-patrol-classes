@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
     <title>Swing Patrol Classes</title>
-    <script src="scripts/vue.min.js"></script>
+    <script src="scripts/vue.js"></script>
     <script src="scripts/axios.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700" rel="stylesheet">
@@ -25,6 +25,9 @@
     <meta name="twitter:card" content="summary_large_image">
 
     <style>
+        html { box-sizing: border-box; }
+        *, *:before, *:after { box-sizing: inherit; }
+
         body {
             margin: 0 0 30px 0;
             font-family: 'Open Sans Condensed', sans-serif;
@@ -35,6 +38,12 @@
                 font-size: 20px;
             }
         }
+
+        ul {
+            padding: 0;
+            list-style: none;
+        }
+
         .wrap {
             max-width: 740px;
             margin: 0 auto;
@@ -68,14 +77,16 @@
 
         .classes-day ul {
             max-width: 170px;
-            padding: 0;
-            list-style: none;
         }
 
         .classes-day li {
             margin: 4px 0;
             padding: 3px 8px;
             background-color: #f7f6f4;
+        }
+
+        .classes-day li:hover {
+            background-color: #eceae2;
         }
 
         .classes-day a {
@@ -144,9 +155,83 @@
             padding: 5px 10px;
         }
 
-        .class-plan-grid .cell-is-odd {
+        .cell-is-odd {
             background-color: #f1f1f1;
         }
+
+        .socials-grid {
+            margin-top: 1em;
+            display: grid;
+            grid-template-columns: repeat(4, auto);
+            font-size: 18px;
+        }
+
+        .socials-grid > * {
+            padding: 5px 2px;
+        }
+
+        .text-smaller {
+            grid-column: 1 / 4;
+            font-size: 80%;
+            color: #a28e67;
+        }
+
+        .icon {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .icon-ext-link {
+            width: 18px;
+            height: 18px;
+            vertical-align: middle;
+            fill: #dac7a0;
+            margin-left: 5px;
+        }
+
+        .btn-plain {
+            text-transform: uppercase;
+            text-decoration: none;
+            background-color: #333;
+            padding: 5px 10px;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-inactive {
+            background-color: #f1f1f1;
+            color: #222;
+        }
+        .btn-inactive:hover, .btn-inactive:focus, .btn-inactive:active {
+            background-color: #ffc4c7;
+        }
+
+        .classes-header {
+            padding: 5px 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .classes-header h1 {
+            text-transform: uppercase;
+            margin-right: 10px;
+        }
+
+        .toggle-wrap {
+            display: flex;
+        }
+
+        .location-link + .location-link {
+            margin-left: 5px;
+        }
+
+        @media(max-width: 400px) {
+            .cell-narrow {
+                max-width: 70px;
+            }
+        }
+        
     </style>
 </head>
 
@@ -154,9 +239,15 @@
 <div id="classes-app">
 
     <main class="wrap">
-        <h1>Swing Patrol Classes</h1>
-
-        <section class="classes-container">
+        <header class="classes-header">
+            <h1>Swing Patrol</h1>
+            <div class="toggle-wrap">
+                <a href="#" class="btn-plain" :class="context==='socials'?'btn-inactive':''" @click.prevent="context='classes'">Classes</a>
+                <a href="#" class="btn-plain" :class="context==='classes'?'btn-inactive':''" @click.prevent="context='socials';socialsLoadedOnce = 1">Socials</a>
+            </div>
+        </header>
+        
+        <section v-show="context==='classes'" class="classes-container">
             <div class="classes-column">
                 <div class="classes-day-wrap">
                     <class-day :day="'Monday'" :classes="classes" :color="'#ffb400'"></class-day>
@@ -166,28 +257,75 @@
                 </div>
             </div>
 
-
             <div class="classes-column">
                 <div class="classes-day-wrap">
                     <class-day :day="'Wednesday'" :classes="classes" :color="'#ff0066'"></class-day>
                 </div>
-
                 <div class="classes-day-wrap">
                     <class-day :day="'Thursday'" :classes="classes" :color="'#b700f3'"></class-day>
                     <class-day :day="'Sunday'" :classes="classes" :color="'#008af5'"></class-day>
                 </div>
             </div>
-
         </section>
+
+        <social-events v-if="socialsLoadedOnce" v-show="context==='socials'" class="socials-container"></social-events>
     </main>
 
     <aside class="wrap">
-        <class-info id="class-info" class="class-info"></class-info>
+        <class-info v-if="context==='classes'" id="class-info" class="class-info" key="class-info"></class-info>
     </aside>
 
 </div>
 
 <script>
+
+
+
+    Vue.component('social-events', {
+        template:
+            `<div>
+                <div class="socials-grid">
+                    <template v-for="(item,idx) in socials"> 
+                        <div :class="gridCellClass(idx)">{{ item.fields.date }} </div>
+                        <div :class="gridCellClass(idx)">
+                            <strong v-html="item.name"></strong>
+                            <a :href="item.permalink" target="_blank"><svg class="icon-ext-link" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M91.9 62H85v23H15V15h23V0H0v100h100V62z"/><path d="M54 0v.6l17.8 17.9L52.7 38H38v24h24V49.8l20.8-20.3L99.4 46h.6V0z"/></svg></a>
+                        </div> 
+                        <div :class="gridCellClass(idx)" class="cell-narrow">{{ item.fields.start_time }}</div>
+                        <div :class="gridCellClass(idx)">
+                            <a class="location-link" :href="item.fields.citymapper_url" target="_blank" title="Citymapper"><img class="icon" src="img/icon-citymapper.png" alt="Citymapper"></a>
+                            <a class="location-link" :href="item.fields.google_maps_url" target="_blank" title="Google Maps"><img class="icon" src="img/icon-gmaps.png" alt="Google Maps"></a>
+                        </div>
+                        <!--<div :class="gridCellClass(idx)" class="text-smaller">{{ item.fields.price }} ({{ item.fields.price_additional }}) </div>-->
+                    </template>
+                </div>
+                <p class="center"><a v-show="page <= max_pages && socials.length!==0" href="#" @click.prevent="getSocialsData()" class="btn-plain">Show more</a></p>
+            </div>`,
+        data() {
+            return {
+                socials: [],
+                page: 1,
+                max_pages: 1
+            }
+        },
+        methods: {
+            getSocialsData() {
+                axios.get('https://www.swingpatrol.co.uk/wp-json/events/all?dates=all&locations=london&page='+this.page)
+                    .then(response => {
+                        this.socials.push(...response.data.posts);
+                        this.page++;
+                        this.max_pages = response.data.max_num_pages;
+                    })
+                    .catch(error => console.log(error));
+            },
+            gridCellClass(idx) {
+                return (idx+1) % 2 ? 'cell-is-odd' : '';
+            }
+        },
+        mounted() {
+            this.getSocialsData();
+        },
+    });
 
     Vue.component('class-day', {
         props: ['day','classes', 'color'],
@@ -291,7 +429,7 @@
                 this.classTimes = classData.fields.class_times;
                 this.citymapper_url = classData.fields.citymapper_url;
                 this.google_maps_url = classData.fields.google_maps_url;
-                this.teachers = classData.fields.teachers.map(el => el.name).join(' & ');
+                this.teachers = classData.fields.teachers ? classData.fields.teachers.map(el => el.name).join(' & ') : "";
             });
         },
         updated: function () {
@@ -303,7 +441,9 @@
         el: '#classes-app',
         data() {
             return {
-                classes: []
+                classes: [],
+                context: 'classes',
+                socialsLoadedOnce: false
             }
         },
         mounted() {
