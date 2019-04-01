@@ -361,11 +361,12 @@
                     </div>
                 </header>
 
-                <div class="class-plan-grid" :class="'cols-' + (classPlans.length+1)" v-show="planDates.size !== 0">
+                <div class="class-plan-grid" :class="'cols-' + (classPlans.length !== 0 ? classPlans.length+1 : classTimes.length+1)">
                     <h3>Date</h3>
-                    <h3 v-for="(item, idx) in classPlans">{{ item.level }} <span>({{ findLevel(item, idx) }})</span></h3>
+                    <h3 v-for="(item, idx) in classPlans" v-show="classPlans.length !== 0">{{ item.level }} <span>({{ findLevel(item, idx) }})</span></h3>
+                    <h3 v-for="(item, idx) in classTimes" v-show="classPlans.length === 0">{{ 'Level ' + item.level }} <span>({{ item.time }})</span></h3>
 
-                    <template v-for="(item, idx) in planDates">
+                    <template v-for="(item, idx) in planDates" v-show="planDates.size !== 0">
                         <div :class="(idx+1) % 2 ? 'cell-is-odd' : ''"> {{ formatDate(item) }} </div>
                         <div :class="(idx+1) % 2 ? 'cell-is-odd' : ''" v-for="planItem in classPlans">
                             {{ planItem.plan.find(entry => entry.date === item).content }}
@@ -383,7 +384,6 @@
                 google_maps_url: '',
                 citymapper_url: '',
                 teachers: '',
-                class_times: [],
                 swingpatrol_url: '',
                 color: undefined,
                 classTimes: [],
