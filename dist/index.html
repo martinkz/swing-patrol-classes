@@ -7,12 +7,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
     <title>Swing Patrol Classes</title>
-    <script src="scripts/vue.min.js"></script>
-    <script src="scripts/axios.min.js"></script>
-
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700" rel="stylesheet">
 
     <link rel="dns-prefetch" href="https://www.swingpatrol.co.uk/">
+
+    <script>
+        let classes = [];
+        for(let i=1; i<=3; i++) {
+            fetch('https://www.swingpatrol.co.uk/wp-json/classes/all?locations=london&order=date&page=' + i)
+                .then(response => response.json())
+                .then(data => {
+                    classes.push(...data.posts);
+                    classes.sort((a, b) =>  a.name > b.name ? 1 : -1);
+                }).catch(err => console.log(err));
+        }
+    </script>
+
+    <script src="scripts/vue.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700" rel="stylesheet">
 
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
@@ -279,8 +291,6 @@
 
 <script>
 
-
-
     Vue.component('social-events', {
         template:
             `<div>
@@ -310,11 +320,12 @@
         },
         methods: {
             getSocialsData() {
-                axios.get('https://www.swingpatrol.co.uk/wp-json/events/all?dates=all&locations=london&page='+this.page)
-                    .then(response => {
-                        this.socials.push(...response.data.posts);
+                fetch('https://www.swingpatrol.co.uk/wp-json/events/all?dates=all&locations=london&page='+this.page)
+                    .then(response => response.json())
+                    .then(data => {
+                        this.socials.push(...data.posts);
                         this.page++;
-                        this.max_pages = response.data.max_num_pages;
+                        this.max_pages = data.max_num_pages;
                     })
                     .catch(error => console.log(error));
             },
@@ -441,19 +452,9 @@
         el: '#classes-app',
         data() {
             return {
-                classes: [],
+                classes: classes,
                 context: 'classes',
                 socialsLoadedOnce: false
-            }
-        },
-        mounted() {
-            for(let i=1; i<=3; i++) {
-                axios.get('https://www.swingpatrol.co.uk/wp-json/classes/all?locations=london&order=date&page=' + i)
-                    .then(response => {
-                        this.classes.push(...response.data.posts);
-                        this.classes.sort((a, b) =>  a.name > b.name ? 1 : -1);
-                    })
-                    .catch(error => console.log(error));
             }
         },
     });
