@@ -12,17 +12,30 @@
 
     <script>
         let classes = [];
-        for(let i=1; i<=3; i++) {
-            fetch('https://www.swingpatrol.co.uk/wp-json/classes/all?locations=london&order=date&page=' + i)
-                .then(response => response.json())
-                .then(data => {
-                    classes.push(...data.posts);
-                    classes.sort((a, b) =>  a.name > b.name ? 1 : -1);
-                }).catch(err => console.log(err));
+
+        try {
+            classes = JSON.parse(window.localStorage.getItem('classData')) || [];
+        } catch (e) {
+            console.log(e);
         }
+
+        Promise.all(
+            [1,2,3].map(n => fetch('https://www.swingpatrol.co.uk/wp-json/classes/all?locations=london&order=date&page=' + n)
+                .then(response => response.json())
+            )
+        ).then(data => {
+            classes.splice(0, classes.length); // Empty array using a method so Vue picks up the change
+            data.forEach(item => classes.push(...item.posts));
+            classes.sort((a, b) =>  a.name > b.name ? 1 : -1);
+            try {
+                window.localStorage.setItem('classData', JSON.stringify(classes));
+            } catch (e) {
+                console.log(e);
+            }
+        });
     </script>
 
-    <script src="scripts/vue.min.js"></script>
+    <script src="scripts/vue.js"></script>
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700" rel="stylesheet">
 
@@ -284,7 +297,7 @@
     </main>
 
     <aside class="wrap">
-        <class-info v-if="context==='classes'" id="class-info" class="class-info" key="class-info"></class-info>
+        <class-info v-if="context==='classes'" :classes="classes" id="class-info" class="class-info" key="class-info"></class-info>
     </aside>
 
 </div>
@@ -357,6 +370,7 @@
     });
 
     Vue.component('class-info', {
+        props: ['classes'],
         template:
             `<article v-show="name !== undefined">
                 <header>
@@ -399,7 +413,8 @@
                 color: undefined,
                 classTimes: [],
                 classPlans: [],
-                planDates: new Set()
+                planDates: new Set(),
+                id: undefined
             }
         },
         methods: {
@@ -412,10 +427,8 @@
                 // Sometimes levels in classPlans don't match the levels in ClassTimes! (e.g. Clapham Junction has levels 1 & 2 in plan but 1 & 1.5 in class times)
                 // In this case we use the index and hope they come in the same order (always the case except for Waterloo)
                 return classTime ? classTime.time : this.classTimes[idx].time;
-            }
-        },
-        mounted() {
-            this.$root.$on('select-class', data => {
+            },
+            updateComponent(data) {
                 let classData = data.item;
                 let plan = [];
                 this.planDates.clear();
@@ -432,6 +445,7 @@
                     }
                 }
 
+                this.id = classData.id;
                 this.classPlans = plan;
                 this.name = classData.name;
                 this.color = data.color;
@@ -441,10 +455,23 @@
                 this.citymapper_url = classData.fields.citymapper_url;
                 this.google_maps_url = classData.fields.google_maps_url;
                 this.teachers = classData.fields.teachers ? classData.fields.teachers.map(el => el.name).join(' & ') : "";
-            });
+            }
+        },
+        mounted() {
+            this.$root.$on('select-class', data => this.updateComponent(data));
         },
         updated: function () {
             document.getElementById("class-info").scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"});
+        },
+        watch: {
+            classes(val) {
+                if(this.id !== undefined) {
+                    this.updateComponent({
+                        'item': val.find(item => item.id === this.id),
+                        'color': this.color
+                    });
+                }
+            }
         }
     });
 
