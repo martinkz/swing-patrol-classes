@@ -394,7 +394,7 @@
                     <template v-for="(item, idx) in planDates" v-show="planDates.size !== 0">
                         <div :class="(idx+1) % 2 ? 'cell-is-odd' : ''"> {{ formatDate(item) }} </div>
                         <div :class="(idx+1) % 2 ? 'cell-is-odd' : ''" v-for="planItem in classPlans">
-                            {{ planItem.plan.find(entry => entry.date === item).content }}
+                            {{ findCorrespondingPlanItem(planItem, item) }}
                         </div>
                     </template>
                 </div>
@@ -427,6 +427,10 @@
                 // Sometimes levels in classPlans don't match the levels in ClassTimes! (e.g. Clapham Junction has levels 1 & 2 in plan but 1 & 1.5 in class times)
                 // In this case we use the index and hope they come in the same order (always the case except for Waterloo)
                 return classTime ? classTime.time : this.classTimes[idx].time;
+            },
+            findCorrespondingPlanItem(planItem, date) {
+                let item = planItem.plan.find(entry => entry.date === date);
+                return item ? item.content : '';
             },
             updateComponent(data) {
                 let classData = data.item;
