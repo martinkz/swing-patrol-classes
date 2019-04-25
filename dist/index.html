@@ -12,6 +12,7 @@
 
     <script>
         let classes = [];
+        let classesLoadedFromNetwork = { val: false };
 
         try {
             classes = JSON.parse(window.localStorage.getItem('classData')) || [];
@@ -24,9 +25,10 @@
                 .then(response => response.json())
             )
         ).then(data => {
-            classes.splice(0, classes.length); // Empty array using a method so Vue picks up the change
+            classes.splice(0, classes.length); // Empty using an Array method so Vue picks up the change
             data.forEach(item => classes.push(...item.posts));
             classes.sort((a, b) =>  a.name > b.name ? 1 : -1);
+            classesLoadedFromNetwork.val = true;
             try {
                 window.localStorage.setItem('classData', JSON.stringify(classes));
             } catch (e) {
@@ -205,7 +207,7 @@
             width: 32px;
             height: 32px;
         }
-        
+
         .icon-ext-link {
             width: 18px;
             height: 18px;
@@ -256,7 +258,27 @@
                 max-width: 70px;
             }
         }
-        
+
+        .loader {
+            width: 36px;
+            height: 36px;
+            animation: spinning 1s infinite;
+        }
+        .loader path {
+            fill: #bbb;
+        }
+
+        @keyframes spinning {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader-container {
+            margin: 10px 0 25px;
+            color: #bbb;
+            text-align: center;
+        }
+        .loader-container svg { vertical-align: middle }
+
     </style>
 </head>
 
@@ -271,7 +293,7 @@
                 <a href="#" class="btn-plain" :class="context==='classes'?'btn-inactive':''" @click.prevent="context='socials';socialsLoadedOnce = 1">Socials</a>
             </div>
         </header>
-        
+
         <section v-show="context==='classes'" class="classes-container">
             <div class="classes-column">
                 <div class="classes-day-wrap">
@@ -297,7 +319,7 @@
     </main>
 
     <aside class="wrap">
-        <class-info v-if="context==='classes'" :classes="classes" id="class-info" class="class-info" key="class-info"></class-info>
+        <class-info v-if="context==='classes'" :classes="classes" :classes-loaded-from-network="classesLoadedFromNetwork" id="class-info" class="class-info" key="class-info"></class-info>
     </aside>
 
 </div>
@@ -307,13 +329,16 @@
     Vue.component('social-events', {
         template:
             `<div>
+                <div class="loader-container" v-if="socials.length===0">
+                    <svg class="loader" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><path d="M44 25.1a18.7 18.7 0 1 0-37.4 0h4a14.6 14.6 0 0 1 29.3 0h4z"/></svg>
+                </div>
                 <div class="socials-grid">
-                    <template v-for="(item,idx) in socials"> 
+                    <template v-for="(item,idx) in socials">
                         <div :class="gridCellClass(idx)">{{ item.fields.date }} </div>
                         <div :class="gridCellClass(idx)">
                             <strong v-html="item.name"></strong>
                             <a :href="item.permalink" target="_blank"><svg class="icon-ext-link" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M91.9 62H85v23H15V15h23V0H0v100h100V62z"/><path d="M54 0v.6l17.8 17.9L52.7 38H38v24h24V49.8l20.8-20.3L99.4 46h.6V0z"/></svg></a>
-                        </div> 
+                        </div>
                         <div :class="gridCellClass(idx)" class="cell-narrow">{{ item.fields.start_time }}</div>
                         <div :class="gridCellClass(idx)">
                             <a class="location-link" :href="item.fields.citymapper_url" target="_blank" title="Citymapper"><img class="icon" src="img/icon-citymapper.png" alt="Citymapper"></a>
@@ -370,11 +395,15 @@
     });
 
     Vue.component('class-info', {
-        props: ['classes'],
+        props: ['classes', 'classesLoadedFromNetwork'],
         template:
             `<article v-show="name !== undefined">
                 <header>
                     <h2 class="center" :style="'color: ' + color" v-html="name"></h2>
+                    <div v-if="!classesLoadedFromNetwork.val"  class="loader-container">
+                        <svg class="loader" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><path d="M44 25.1a18.7 18.7 0 1 0-37.4 0h4a14.6 14.6 0 0 1 29.3 0h4z"/></svg>
+                        Updating class info
+                    </div>
 
                     <div class="class-more-info">
                         <div><strong>{{ day }}</strong></div>
@@ -414,7 +443,7 @@
                 classTimes: [],
                 classPlans: [],
                 planDates: new Set(),
-                id: undefined
+                id: undefined,
             }
         },
         methods: {
@@ -485,7 +514,8 @@
             return {
                 classes: classes,
                 context: 'classes',
-                socialsLoadedOnce: false
+                socialsLoadedOnce: false,
+                classesLoadedFromNetwork: classesLoadedFromNetwork
             }
         },
     });
