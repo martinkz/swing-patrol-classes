@@ -20,13 +20,11 @@
             console.log(e);
         }
 
-        Promise.all(
-            [1,2,3].map(n => fetch('https://www.swingpatrol.co.uk/wp-json/classes/all?locations=london&order=date&page=' + n)
-                .then(response => response.json())
-            )
-        ).then(data => {
+        fetch('https://www.swingpatrol.co.uk/wp-json/classes/all?locations=london&order=date')
+        .then(response => response.json())
+        .then(data => {
             classes.splice(0, classes.length); // Empty using an Array method so Vue picks up the change
-            data.forEach(item => classes.push(...item.posts));
+            data.posts.forEach(item => classes.push(item));
             classes.sort((a, b) =>  a.name > b.name ? 1 : -1);
             classesLoadedFromNetwork.val = true;
             try {
